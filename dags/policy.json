@@ -1,0 +1,11 @@
+{
+    "owner" : "Pratap Padhy",
+    "email": "pratappadhy2005@gmail.com",
+    "applicationId":"edap-record-management",
+    "businessUnitName": "EDRM",
+    "retentionPolicy": "90",
+    "vaultName": "edap-mvp1-poc-demo",
+    "moveToArchive": "yes",
+    "moveToDeepArchive": "yes",
+    "fileName": "unstructured.csv"
+}
