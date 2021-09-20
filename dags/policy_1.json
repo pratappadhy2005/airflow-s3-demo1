@@ -4,10 +4,10 @@
     "applicationId":"edap-record-management",
     "businessUnitName": "EDRM",
     "retentionPolicy": "90",
-    "vaultName": "edap-mvp1-poc-demo-policy",
+    "vaultName": "edap-mvp1-poc-demo-policy-1",
     "moveToArchive": "yes",
     "moveToDeepArchive": "yes",
-    "fileName": "unstructured.csv",
-    "manifestFileName": "manifest.json",
+    "fileName": "unstructured_1.csv",
+    "manifestFileName": "manifest_1.json",
     "manifestValutName": "edap-mvp1-poc-demo-manifest"
 }

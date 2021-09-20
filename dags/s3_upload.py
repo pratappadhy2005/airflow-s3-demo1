@@ -6,22 +6,35 @@ from auth import ACCESS_KEY,SECRET_KEY
 from create_manifest import *
 
 def pushS3():
-    with open("/usr/local/airflow/dags/policy.json") as jsonFile:
-        jsonObject = json.load(jsonFile)
-        jsonFile.close()
+    directory = r'/usr/local/airflow/dags'
+    for filename in os.listdir(directory):
+        if filename.startswith("policy"):
+            print(os.path.join(directory, filename))
+            with open("/usr/local/airflow/dags/"+filename) as jsonFile:
+                jsonObject = json.load(jsonFile)
+                jsonFile.close()
 
-    # This value should be read from the create_manifest python file
-    S3_BUCKET_NAME = jsonObject['vaultName']
-    print(S3_BUCKET_NAME)
-    ''' pushing data to S3 bucket'''
-    client=boto3.client('s3',aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY)
+                UnstructuredFileName = jsonObject['fileName']
+                ManifestFileName = jsonObject['manifestFileName']
+                ManifestVaultName = jsonObject['manifestValutName']
+                S3_BUCKET_NAME = jsonObject['vaultName']
+                #PolicyFileName = jsonObject['vaultName']
 
-    #Start uploading the files
-    client.create_bucket(Bucket=S3_BUCKET_NAME)
-    with open("/usr/local/airflow/dags/unstructured.csv","rb") as f:
-        client.upload_fileobj(f,S3_BUCKET_NAME,"unstructured.csv")
-    with open("/usr/local/airflow/dags/policy.json","rb") as f:
-        client.upload_fileobj(f,S3_BUCKET_NAME,"policy.json")
-    with open("/usr/local/airflow/dags/manifest.json","rb") as f:
-        client.upload_fileobj(f,S3_BUCKET_NAME,"manifest.json")
-    print("Policy, Manifest and Unstructured files have been uploaded to S3")
+                # This value should be read from the create_manifest python file
+                # Upload Manifest files
+                ''' pushing data to S3 bucket'''
+                client=boto3.client('s3',aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY)
+
+                #Start uploading the manifest files
+                client.create_bucket(Bucket=ManifestVaultName)
+                with open("/usr/local/airflow/dags/"+ManifestFileName,"rb") as f:
+                    client.upload_fileobj(f,ManifestVaultName,ManifestFileName)
+                print("Manifest files have been uploaded to S3")
+
+                # Upload policy and unstructured files
+                client.create_bucket(Bucket=S3_BUCKET_NAME)
+                with open("/usr/local/airflow/dags/"+UnstructuredFileName,"rb") as f:
+                    client.upload_fileobj(f,S3_BUCKET_NAME,UnstructuredFileName)
+                with open("/usr/local/airflow/dags/"+filename,"rb") as f:
+                    client.upload_fileobj(f,S3_BUCKET_NAME,filename)
+                print("Policy and unstructured files have been uploaded to S3")
