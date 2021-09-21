@@ -7,7 +7,7 @@
     "vaultName": "edap-mvp1-poc-demo-policy",
     "moveToArchive": "yes",
     "moveToDeepArchive": "yes",
-    "fileName": "unstructured.csv",
+    "fileDetails": ["unstructured_1.csv","unstructured_2.csv","unstructured_3.csv"],
     "manifestFileName": "manifest.json",
     "manifestValutName": "edap-mvp1-poc-demo-manifest"
 }

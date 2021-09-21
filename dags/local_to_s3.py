@@ -1,6 +1,7 @@
 from airflow import DAG
 from datetime import datetime, timedelta
-from airflow.operators.python_operator import PythonOperator
+from airflow.operators.python_operator import PythonOperator, ShortCircuitOperator
+from validate_policy import validateJSON
 from s3_upload import pushS3
 from create_manifest import edapPolicy
 
@@ -12,5 +13,8 @@ default_args = {
 }
 
 with DAG("S3_UPLOAD",default_args=default_args, schedule_interval="@daily", catchup=False) as dag:
-    t1=PythonOperator(task_id="Read-Policy-And-Create-Manifest-Python", python_callable=edapPolicy)
-    t2=PythonOperator(task_id="S3-Using-Python", python_callable=pushS3)
+    t1=ShortCircuitOperator(task_id="Validate-Policy-Files", provide_context=True, python_callable=validateJSON)
+    t2=PythonOperator(task_id="Read-Policy-And-Create-Manifest-Python", provide_context=True, python_callable=edapPolicy)
+    t3=PythonOperator(task_id="S3-Using-Python", provide_context=True, python_callable=pushS3)
+
+    t1 >> t2 >> t3

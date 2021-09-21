@@ -5,7 +5,7 @@ import  boto3
 from auth import ACCESS_KEY,SECRET_KEY
 from create_manifest import *
 
-def pushS3():
+def pushS3(**kwargs):
     directory = r'/usr/local/airflow/dags'
     for filename in os.listdir(directory):
         if filename.startswith("policy"):
@@ -14,7 +14,7 @@ def pushS3():
                 jsonObject = json.load(jsonFile)
                 jsonFile.close()
 
-                UnstructuredFileName = jsonObject['fileName']
+                fileArray = jsonObject['fileDetails']
                 ManifestFileName = jsonObject['manifestFileName']
                 ManifestVaultName = jsonObject['manifestValutName']
                 S3_BUCKET_NAME = jsonObject['vaultName']
@@ -33,8 +33,13 @@ def pushS3():
 
                 # Upload policy and unstructured files
                 client.create_bucket(Bucket=S3_BUCKET_NAME)
-                with open("/usr/local/airflow/dags/"+UnstructuredFileName,"rb") as f:
-                    client.upload_fileobj(f,S3_BUCKET_NAME,UnstructuredFileName)
+
+                #Upload all unstructured files
+                for unstructuredFileName in fileArray:
+                    with open("/usr/local/airflow/dags/"+unstructuredFileName,"rb") as f:
+                        client.upload_fileobj(f,S3_BUCKET_NAME,unstructuredFileName)
+                        
+                #Upload the policy file
                 with open("/usr/local/airflow/dags/"+filename,"rb") as f:
                     client.upload_fileobj(f,S3_BUCKET_NAME,filename)
                 print("Policy and unstructured files have been uploaded to S3")

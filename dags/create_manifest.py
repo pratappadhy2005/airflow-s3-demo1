@@ -1,7 +1,7 @@
 import json
 import os, time, datetime
 S3_BUCKET_NAME="Initial Value"
-def edapPolicy():
+def edapPolicy(**kwargs):
 #Read the policy file
     directory = r'/usr/local/airflow/dags'
     for filename in os.listdir(directory):
@@ -19,56 +19,52 @@ def edapPolicy():
                 S3_BUCKET_NAME = jsonObject['vaultName']
                 MoveToArchive = jsonObject['moveToArchive']
                 MoveToDeepArchive = jsonObject['moveToDeepArchive']
-                FileName = jsonObject['fileName']
+                fileArray = jsonObject['fileDetails']
                 ManifestFileName = jsonObject['manifestFileName']
 
                 print(Email)
                 print(Owner)
-                print(FileName)   
+                print(fileArray)   
                 print(S3_BUCKET_NAME) 
+                
+                finalFileName = "["
+                for fileName in fileArray:
+                    print(fileName)
+                    #Get metadata of a file using the standard Python script
+                    file = "/usr/local/airflow/dags/" + fileName
 
-                #Get metadata of a file using the standard Python script
-                file = "/usr/local/airflow/dags/" + FileName
+                    print(file)
+                    
+                    if "[" == finalFileName:
+                        finalFileName = finalFileName + '"' + fileName +'"'
+                    else:
+                        finalFileName = finalFileName + ',"' + fileName +'"'     
+                    
 
-                print(file)
+                    modified = os.path.getmtime(file)
+                    print("Date modified: "+time.ctime(modified))
+                    print("Date modified:",datetime.datetime.fromtimestamp(modified))
+                    year,month,day,hour,minute,second=time.localtime(modified)[:-3]
+                    print("Date modified: %02d/%02d/%d %02d:%02d:%02d"%(day,month,year,hour,minute,second))
 
-                #print("Modified")
-                #print(os.stat(file)[-2])
-                #print(os.stat(file).st_mtime)
-                #print(os.path.getmtime(file))
+                    print()
 
-                #print()
-
-                #print("Created")
-                #print(os.stat(file)[-1])
-                #print(os.stat(file).st_ctime)
-                #print(os.path.getctime(file))
-
-                #print()
-
-                modified = os.path.getmtime(file)
-                print("Date modified: "+time.ctime(modified))
-                print("Date modified:",datetime.datetime.fromtimestamp(modified))
-                year,month,day,hour,minute,second=time.localtime(modified)[:-3]
-                print("Date modified: %02d/%02d/%d %02d:%02d:%02d"%(day,month,year,hour,minute,second))
-
-                print()
-
-                created = os.path.getctime(file)
-                print("Date created: "+time.ctime(created))
-                print("Date created:",datetime.datetime.fromtimestamp(created))
-                year,month,day,hour,minute,second=time.localtime(created)[:-3]
-                print("Date created: %02d/%02d/%d %02d:%02d:%02d"%(day,month,year,hour,minute,second))
+                    created = os.path.getctime(file)
+                    print("Date created: "+time.ctime(created))
+                    print("Date created:",datetime.datetime.fromtimestamp(created))
+                    year,month,day,hour,minute,second=time.localtime(created)[:-3]
+                    print("Date created: %02d/%02d/%d %02d:%02d:%02d"%(day,month,year,hour,minute,second))
 
                 #Create Manifest file by reading the JSON policy and unstructured file.
+                finalFileName = finalFileName + "]"
                 json_data = {
-                    "fileName": FileName,
+                    "fileNames": finalFileName,
                     "createdBy": Owner,
                     "updatedBy": Owner,
                     "email" : Email,
                     "createdDateTime": time.ctime(created),
                     "updatedDateTime": time.ctime(modified),
-                    "searchKey": FileName
+                    "searchKey": finalFileName
                 }
                 
                 print(json_data)   
